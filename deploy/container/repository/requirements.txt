@@ -1,0 +1,4 @@
+protobuf==3.19.4
+torch==2.1.1
+yolox==0.3.0
+./ait_sdk-0.1.20-py3-none-any.whl
