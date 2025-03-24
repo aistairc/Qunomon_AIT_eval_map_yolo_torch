@@ -1,6 +1,31 @@
 @echo off
 
-echo #####AIT GITHUB PUSH#####
+echo ##### AIT GITHUB PUSH #####
+echo *************************************************************************************
+echo *************************************************************************************
+echo **  important :                                                                    **
+echo **    Before publishing the AIT to GITHUB,                                         **
+echo **    ensure that no personal or confidential information is disclosed and         **
+echo **    that the publication aligns with your objectives.                            **
+echo **    Please proceed with these precautions.                                       **
+echo **                                                                                 **
+echo **  Disclaimer :                                                                   **
+echo **    The publication of AITs on this platform is the                              **
+echo **    responsibility of the developers.                                            **
+echo **    The developers guarantee that the information contained in AIT               **
+echo **    does not infringe any third-party intellectual property rights and           **
+echo **    does not include any personal or confidential information.                   **
+echo **                                                                                 **
+echo **    In the event that developers inadvertently publish confidential information, ** 
+echo **    or if AIT is improperly used by a third party,                               **
+echo **    neither this platform nor its operators shall bear any liability.            **
+echo **    The developers shall bear full responsibility for any direct or              **
+echo **    indirect damages that may arise from the use of AIT.                         **
+echo **                                                                                 **
+echo **    Users of this platform understand the potential risks associated with        **
+echo **    using AIT and agree to use AIT at their own risk.                            **
+echo *************************************************************************************
+echo *************************************************************************************
 
 set INPUT_INVENTORY_ADD_FLAG=
 set INPUT_COMMIT_COMMENT=
