@@ -38,7 +38,7 @@
 
 # [uneditable]
 
-# In[ ]:
+# In[1]:
 
 
 # Determine whether to start AIT or jupyter by startup argument
@@ -162,7 +162,7 @@ if not is_ait_launch:
     from ait_sdk.common.files.ait_manifest_generator import AITManifestGenerator
     manifest_generator = AITManifestGenerator(current_dir)
     manifest_generator.set_ait_name('eval_map_yolo_torch')
-    manifest_generator.set_ait_description('敵対的攻撃によって、mAPがどれだけ低下するかを測定し、モデルが攻撃に対して脆弱であるかを判断する。$mAP_{drop}=(1-\frac{mAP_{adv}}{mAP_{org}})*100$$mAP_{org}$:敵対攻撃なしのデータでのモデルのmAP$mAP_{adv}$:敵対攻撃後のデータでのモデルのmAP')
+    manifest_generator.set_ait_description('pytorchの物体検出モデルの推論結果から、テストデータのmean Average Precision(mAP)をを算出し、精度を評価する。\\n \\begin{math}AP=\\frac{1}{N}\sum_{i=1}^{N}P(R_{i})\\end{math} \\n \\begin{math}mAP=\\frac{1}{C}\sum_{c=1}^{C}AP_{c}\\end{math}  \\n ここで、\\begin{math}R_{i}\\end{math}は異なる再現率のポイント、\\begin{math}P(R_{i})\\end{math}はその点での適合率、Cはクラス数、\\begin{math}AP_{c}\\end{math}はクラスcに対するAverage Precision(AP)')
     manifest_generator.set_ait_source_repository('https://github.com/aistairc/Qunomon_AIT_eval_map_yolo_torch')
     manifest_generator.set_ait_version('0.2')
     manifest_generator.add_ait_keywords('AIT')
@@ -174,22 +174,22 @@ if not is_ait_launch:
     inventory_requirement_dataset = manifest_generator.format_ait_inventory_requirement(format_=['h5'])
     manifest_generator.add_ait_inventories(name='test_dataset',
                                              type_='dataset',
-                                             description="テスト用データセットを格納したHDF5ファイル. HDF5ファイルの内部に2つのデータセットを用意する(1)モデルに入力される多次元配列を含むデータセット(データセット(1)の要素数はmodelの入力層の要素数と一致)(2)各画像データの正解ラベル（バウンディングボックスとクラス情報）を含むデータセット(データセット(2)の要素数はmodelの出力層の要素数と一致))．テストデータの画像サイズはモデルが期待する入力画像サイズと一致させる",
+                                             description="テスト用データセットを格納したHDF5ファイル。 HDF5ファイルの内部に2つのデータセットを用意する(1)モデルに入力される画像データセット(データセット(1)の要素数はmodelの入力層の要素数と一致)(2)各画像データのyolo形式の正解ラベル（バウンディングボックスとクラス情報）を含むデータセット(データセット(2)の要素数はmodelの出力層の要素数と一致))",
                                              requirement=inventory_requirement_dataset)
-    inventory_requirement_trained_model = manifest_generator.format_ait_inventory_requirement(format_=['*'])
+    inventory_requirement_trained_model = manifest_generator.format_ait_inventory_requirement(format_=['.torchscript'])
     manifest_generator.add_ait_inventories(name='trained_model', 
                                              type_='model', 
-                                             description='torch.jit.save関数を使用しTorchScript形式で保存されたモデルデータ.入力と出力の要素数はtest_dataset inventoryと一致させる',
+                                             description='TorchScript形式でexportしたYOLOの物体検出モデル（.torchscript）。入力と出力の要素数はtest_dataset inventoryと一致させる',
                                              requirement=inventory_requirement_trained_model)
     #### Parameters
-    manifest_generator.add_ait_parameters(name='test_label_dataset_name',
-                                          type_='str',
-                                          description='HDF5形式のテスト用ファイル内の画像データセット(1)の名前.',
-                                          default_val='label_dataset_name')
     manifest_generator.add_ait_parameters(name='test_image_dataset_name',
                                           type_='str',
-                                          description='HDF5形式のテスト用ファイル内のラベルデータセット(2)の名前.',
+                                          description='HDF5形式のテスト用ファイル内の画像データセット(1)の名前.要素数はmodelの入力層の要素数と一致',
                                           default_val='image_dataset_name')
+    manifest_generator.add_ait_parameters(name='test_label_dataset_name',
+                                          type_='str',
+                                          description='HDF5形式のテスト用ファイル内のラベルデータセット(2)の名前.クラスラベル値の数はmodelの出力層の要素数と一致',
+                                          default_val='label_dataset_name')
     manifest_generator.add_ait_parameters(name='image_count',
                                           type_='int',
                                           description='使用する画像数',
@@ -644,8 +644,10 @@ def main() -> None:
     with h5py.File(test_h5,"r") as h5:
         yolo_labels = np.array(h5[yolo_label_dataset_name][:image_count])
         images=np.array(h5[image_dataset_name][:image_count])
+    #イメージの高さと幅を取得
+    _, image_height, image_width, _ = images.shape
     decoded_labels = decode_all_labels(yolo_labels)
-    bbox_all_labels = yolo_to_bbox(decoded_labels,img_width=640,img_height=640)
+    bbox_all_labels = yolo_to_bbox(decoded_labels,img_width=image_width,img_height=image_height)
     
     # bbox_all_labels のクラス数を計算
     all_labels = []
@@ -654,7 +656,7 @@ def main() -> None:
     unique_labels = np.unique(all_labels)
     num_classes = len(unique_labels)
     
-    #DPatch最適化用の画像の用意
+    #推論用の画像の用意
     norm_images=images.astype(np.float32)/255
     norm_images_t = np.transpose(norm_images,(0,3,1,2))
     norm_images_tensor = torch.tensor(norm_images_t)
@@ -664,6 +666,9 @@ def main() -> None:
     mAP = calculate_map(trained_model, norm_images_tensor, bbox_all_labels, threshold=iou_threshold)
     print(f"Mean Average Precision (mAP)[iou_threshold]: {mAP:.4f}")
     calc_map(mAP.item())
+    # PR曲線のプロット
+    plot_pr_curves(trained_model, norm_images_tensor, bbox_all_labels, threshold=iou_threshold, num_classes=num_classes)
+    
     mAP_50 = calculate_map(trained_model, norm_images_tensor, bbox_all_labels, threshold=0.5)
     mAP_75 = calculate_map(trained_model, norm_images_tensor, bbox_all_labels, threshold=0.75)
     # サイズごとのmAPの計算
@@ -671,12 +676,8 @@ def main() -> None:
     # CSVに保存
     save_map_to_csv(mAP, mAP_50, mAP_75, mAP_small, mAP_medium, mAP_large)
     
-    # PR曲線のプロット
-    plot_pr_curves(trained_model, norm_images_tensor, bbox_all_labels, threshold=iou_threshold, num_classes=num_classes)
-    
     # バウンディングボックス情報のCSV出力
     output_bbox_csv(trained_model, norm_images_tensor, bbox_all_labels, threshold=iou_threshold, num_classes=num_classes)
-
 
     move_log()
 

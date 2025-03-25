@@ -1,6 +1,6 @@
 {
   "name": "eval_map_yolo_torch",
-  "description": "敵対的攻撃によって、mAPがどれだけ低下するかを測定し、モデルが攻撃に対して脆弱であるかを判断する。$mAP_{drop}=(1-\frac{mAP_{adv}}{mAP_{org}})*100$$mAP_{org}$:敵対攻撃なしのデータでのモデルのmAP$mAP_{adv}$:敵対攻撃後のデータでのモデルのmAP",
+  "description": "pytorchの物体検出モデルの推論結果から、テストデータのmean Average Precision(mAP)をを算出し、精度を評価する。\\n \\begin{math}AP=\\frac{1}{N}\\sum_{i=1}^{N}P(R_{i})\\end{math} \\n \\begin{math}mAP=\\frac{1}{C}\\sum_{c=1}^{C}AP_{c}\\end{math}  \\n ここで、\\begin{math}R_{i}\\end{math}は異なる再現率のポイント、\\begin{math}P(R_{i})\\end{math}はその点での適合率、Cはクラス数、\\begin{math}AP_{c}\\end{math}はクラスcに対するAverage Precision(AP)",
   "source_repository": "https://github.com/aistairc/Qunomon_AIT_eval_map_yolo_torch",
   "version": "0.2",
   "quality": "https://ait-hub.pj.aist.go.jp/ait-hub/api/0.0.1/qualityDimensions/機械学習品質マネジメントガイドライン第三版/C-1機械学習モデルの正確性",
@@ -16,7 +16,7 @@
     {
       "name": "test_dataset",
       "type": "dataset",
-      "description": "テスト用データセットを格納したHDF5ファイル. HDF5ファイルの内部に2つのデータセットを用意する(1)モデルに入力される多次元配列を含むデータセット(データセット(1)の要素数はmodelの入力層の要素数と一致)(2)各画像データの正解ラベル（バウンディングボックスとクラス情報）を含むデータセット(データセット(2)の要素数はmodelの出力層の要素数と一致))．テストデータの画像サイズはモデルが期待する入力画像サイズと一致させる",
+      "description": "テスト用データセットを格納したHDF5ファイル。 HDF5ファイルの内部に2つのデータセットを用意する(1)モデルに入力される画像データセット(データセット(1)の要素数はmodelの入力層の要素数と一致)(2)各画像データのyolo形式の正解ラベル（バウンディングボックスとクラス情報）を含むデータセット(データセット(2)の要素数はmodelの出力層の要素数と一致))",
       "requirement": {
         "format": [
           "h5"
@@ -26,26 +26,26 @@
     {
       "name": "trained_model",
       "type": "model",
-      "description": "torch.jit.save関数を使用しTorchScript形式で保存されたモデルデータ.入力と出力の要素数はtest_dataset inventoryと一致させる",
+      "description": "TorchScript形式でexportしたYOLOの物体検出モデル（.torchscript）。入力と出力の要素数はtest_dataset inventoryと一致させる",
       "requirement": {
         "format": [
-          "*"
+          ".torchscript"
         ]
       }
     }
   ],
   "parameters": [
     {
-      "name": "test_label_dataset_name",
-      "type": "str",
-      "description": "HDF5形式のテスト用ファイル内の画像データセット(1)の名前.",
-      "default_val": "label_dataset_name"
-    },
-    {
       "name": "test_image_dataset_name",
       "type": "str",
-      "description": "HDF5形式のテスト用ファイル内のラベルデータセット(2)の名前.",
+      "description": "HDF5形式のテスト用ファイル内の画像データセット(1)の名前.要素数はmodelの入力層の要素数と一致",
       "default_val": "image_dataset_name"
+    },
+    {
+      "name": "test_label_dataset_name",
+      "type": "str",
+      "description": "HDF5形式のテスト用ファイル内のラベルデータセット(2)の名前.クラスラベル値の数はmodelの出力層の要素数と一致",
+      "default_val": "label_dataset_name"
     },
     {
       "name": "image_count",
