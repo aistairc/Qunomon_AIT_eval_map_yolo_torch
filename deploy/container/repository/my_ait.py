@@ -160,11 +160,13 @@ from ait_sdk.develop.annotation import measures, resources, downloads, ait_main 
 
 if not is_ait_launch:
     from ait_sdk.common.files.ait_manifest_generator import AITManifestGenerator
+    
     manifest_generator = AITManifestGenerator(current_dir)
     manifest_generator.set_ait_name('eval_map_yolo_torch')
     manifest_generator.set_ait_description('pytorchの物体検出モデルの推論結果から、テストデータのmean Average Precision(mAP)をを算出し、精度を評価する。\\n \\begin{math}AP=\\frac{1}{N}\sum_{i=1}^{N}P(R_{i})\\end{math} \\n \\begin{math}mAP=\\frac{1}{C}\sum_{c=1}^{C}AP_{c}\\end{math}  \\n ここで、\\begin{math}R_{i}\\end{math}は異なる再現率のポイント、\\begin{math}P(R_{i})\\end{math}はその点での適合率、Cはクラス数、\\begin{math}AP_{c}\\end{math}はクラスcに対するAverage Precision(AP)')
     manifest_generator.set_ait_source_repository('https://github.com/aistairc/Qunomon_AIT_eval_map_yolo_torch')
     manifest_generator.set_ait_version('0.2')
+    manifest_generator.add_ait_licenses('Apache License Version 2.0')
     manifest_generator.add_ait_keywords('AIT')
     manifest_generator.add_ait_keywords('Object Detection')
     manifest_generator.add_ait_keywords('Yolo')

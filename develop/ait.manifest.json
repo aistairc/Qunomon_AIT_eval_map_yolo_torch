@@ -11,7 +11,9 @@
     "mAP"
   ],
   "references": [],
-  "licenses": [],
+  "licenses": [
+    "Apache License Version 2.0"
+  ],
   "inventories": [
     {
       "name": "test_dataset",
