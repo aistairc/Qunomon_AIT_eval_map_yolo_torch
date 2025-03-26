@@ -350,7 +350,7 @@ def calculate_map(model, images, labels, threshold):
 
 
 @log(logger)
-@resources(ait_output, path_helper, 'precision_recall_curve','precision_recall_curve')
+@resources(ait_output, path_helper, 'precision_recall_curve','precision_recall_curve.png')
 def plot_pr_curves(model, images, labels, threshold, num_classes, file_path: str=None):
     """
     各クラスのPR曲線をプロットし、クラスごとのAP（平均適合率）を出力する関数

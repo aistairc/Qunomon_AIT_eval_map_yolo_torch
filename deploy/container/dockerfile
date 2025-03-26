@@ -25,6 +25,9 @@ ENV LC_MESSAGES ja_JP.UTF-8
 RUN apt-get update -yqq \
     && apt-get install gcc g++ make libffi-dev libssl-dev -yqq
 
+RUN apt-get update -yqq \
+    && apt-get install libopencv-dev -yqq
+
 # コンテナ依存関係を解決
 COPY ./resolve-dependencies.sh /resolve-dependencies.sh
 RUN chmod +x /resolve-dependencies.sh
