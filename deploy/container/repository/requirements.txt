@@ -1,6 +1,6 @@
-torch==2.6.0
+torch==2.7.0
 torchmetrics==1.6.2
-ultralytics==8.3.89
+ultralytics==8.3.139
 pandas==2.2.3
 numpy==2.0.2
 opencv-python-headless==4.11.0.86

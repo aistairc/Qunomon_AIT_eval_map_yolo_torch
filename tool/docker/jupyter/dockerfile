@@ -6,7 +6,13 @@ RUN apt-get update && apt-get install -y \
     git \
     tree \
     vim \
-    wget
+    wget \
+    gcc \
+    g++ \
+    make \
+    libffi-dev \
+    libssl-dev \
+    libopencv-dev
 
 # RUN pip install --upgrade pip
 RUN pip3 install --upgrade pip setuptools \
